@@ -14,7 +14,7 @@ struct ScienceContent: Codable, Identifiable {
         ScienceContent(
             id: UUID().uuidString,
             title: "Loading...",
-            content: "Fetching today's science fact...",
+            content: "GALLERY PREVIEW ONLY",
             date: Date(),
             source: nil,
             imageURL: nil

@@ -1,188 +1,97 @@
-# Xcode Setup Guide
+# Setup & Architecture Guide
 
-This guide will help you set up the Science Widget project in Xcode once it's installed.
+This guide explains how the project is structured and how the app + widget work together. Use it as a **reference**, not a step‑by‑step tutorial.
 
-## Prerequisites
+## Targets & Schemes
 
-- ✅ Xcode installed (latest version recommended)
-- ✅ macOS with iOS development support
-- ✅ Apple Developer account (free account works for simulator testing)
+- **App target**: `ScienceWidgetAppProject`
+  - Scheme: `ScienceWidgetAppProject`
+  - Entry: `ScienceWidgetApp.swift`
+  - Main UI: `ContentView.swift`
 
-## Step 1: Create New Xcode Project
+- **Widget target**: `ScienceWidgetExtensionExtension`
+  - Scheme: `ScienceWidgetExtensionExtension`
+  - Bundle: `ScienceWidgetBundle.swift`
+  - Timeline: `ScienceTimelineProvider.swift`
+  - Views:
+    - `SmallWidgetView` (small widget)
+    - `MediumWidgetView` (medium widget)
 
-**Important**: Create the Xcode project **IN THIS DIRECTORY** (`/Users/gaod1/projects/TIL/`) so everything stays together for Git.
+## File Structure (high level)
 
-1. Open Xcode
-2. Select **File → New → Project**
-3. Choose **iOS → App**
-4. Configure the project:
-   - **Product Name**: `ScienceWidget`
-   - **Team**: Select your team (or "None" for simulator only)
-   - **Organization Identifier**: `com.til` (or your preferred identifier)
-   - **Interface**: SwiftUI
-   - **Language**: Swift
-   - **Storage**: None (or Core Data if you want to add it later)
-5. Click **Next**
-6. **Navigate to `/Users/gaod1/projects/TIL/`** and click **Create**
-   - This will create `ScienceWidget.xcodeproj` in the same directory as your Swift files
-   - This makes Git workflow easier (see GIT_WORKFLOW.md)
+- `ScienceWidgetAppProject/ScienceWidgetAppProject/`
+  - `ScienceWidgetApp.swift` – `@main` app, shows `ContentView`
+  - `ContentView.swift` – full‑screen view with daily science text + Refresh
+  - `Models/ScienceContent.swift` – data model + placeholder/error helpers
+  - `Providers/ScienceDataManager.swift` – fetch + cache orchestration
+  - `Providers/ScienceTimelineProvider.swift` – WidgetKit timeline
+  - `Utilities/APIClient.swift` – NASA APOD integration
+  - `Utilities/CacheManager.swift` – shared UserDefaults (App Group) cache
+  - `Views/SmallWidgetView.swift` – compact widget UI
+  - `Views/MediumWidgetView.swift` – larger widget UI (more text)
 
-## Step 2: Add Widget Extension
+- `ScienceWidgetAppProject/ScienceWidgetExtension/`
+  - `Info.plist` – widget extension configuration
+  - `Assets.xcassets` – widget icons and background color
 
-1. In Xcode, go to **File → New → Target**
-2. Select **Widget Extension**
-3. Configure:
-   - **Product Name**: `ScienceWidgetExtension`
-   - **Include Configuration Intent**: Unchecked (we're using StaticConfiguration)
-   - **Language**: Swift
-4. Click **Finish**
-5. When prompted, click **Activate** for the scheme
+## Data Flow
 
-## Step 3: Copy Swift Files
+1. **Widget timeline** (`ScienceTimelineProvider`)
+   - WidgetKit asks for a **timeline** of entries.
+   - Provider calls `ScienceDataManager.shared.getTodaysContent()`.
 
-Copy all the prepared Swift files into your Xcode project:
+2. **Data manager** (`ScienceDataManager`)
+   - Uses `APIClient.fetchDailyScience()` to get NASA APOD (or fallback).
+   - Uses `CacheManager` to reuse data within the same day.
 
-### Option A: Drag and Drop (Recommended)
+3. **NASA integration** (`APIClient`)
+   - Calls `https://api.nasa.gov/planetary/apod?api_key=YOUR_KEY`.
+   - Maps the JSON response into `ScienceContent`.
+   - Saves result into the shared cache.
 
-1. In Finder, navigate to `/Users/gaod1/projects/TIL/ScienceWidget/`
-2. Drag the entire folder structure into Xcode's Project Navigator
-3. Make sure **"Copy items if needed"** is checked
-4. Select **"Create groups"** (not folder references)
-5. Add to targets:
-   - ✅ ScienceWidget (main app)
-   - ✅ ScienceWidgetExtension (widget extension)
+4. **Widget views**
+   - `ScienceWidgetBundle` creates `ScienceWidget`.
+   - `ScienceWidgetEntryView` chooses:
+     - `SmallWidgetView` for `.systemSmall`
+     - `MediumWidgetView` for `.systemMedium`
 
-### Option B: Manual Copy
+5. **App view** (`ContentView`)
+   - Uses the same `ScienceDataManager` to show the **same NASA entry**.
+   - `Refresh` button clears cache and forces a refetch.
 
-Copy files to these locations in your Xcode project:
+## Widget Sizes
 
-**Main App Target:**
-- `ScienceWidgetApp.swift` → Replace the default `App.swift`
-- `Models/ScienceContent.swift`
-- `Utilities/CacheManager.swift`
-- `Utilities/APIClient.swift`
-- `Providers/ScienceDataManager.swift`
-- `Views/ContentView.swift` (from `ScienceWidgetApp.swift`)
+- **Small widget**
+  - Uses `SmallWidgetView`.
+  - Shows header + truncated title + short body.
 
-**Widget Extension Target:**
-- `ScienceWidgetBundle.swift` → Replace the default widget bundle
-- `Providers/ScienceTimelineProvider.swift`
-- `Views/SmallWidgetView.swift`
-- `Views/WidgetPlaceholderView.swift`
-- `Models/ScienceContent.swift`
-- `Utilities/CacheManager.swift`
-- `Utilities/APIClient.swift`
-- `Providers/ScienceDataManager.swift`
+- **Medium widget**
+  - Uses `MediumWidgetView`.
+  - Shows header + longer title + more body text + optional source.
 
-## Step 4: Configure App Groups
+You can add more sizes later by extending `supportedFamilies` and `ScienceWidgetEntryView`.
 
-To share data between the app and widget extension:
+## Common Issues & Fixes
 
-1. Select your **main app target** (ScienceWidget)
-2. Go to **Signing & Capabilities** tab
-3. Click **+ Capability**
-4. Add **App Groups**
-5. Create a new group: `group.com.til.sciencewidget` (or match the identifier in `CacheManager.swift`)
-6. Repeat for the **widget extension target**
+- **"Cannot find 'MediumWidgetView' in scope"**
+  - Make sure `MediumWidgetView.swift` is added to the project and its **Target Membership** includes `ScienceWidgetExtensionExtension`.
 
-## Step 5: Update Info.plist (if needed)
+- **"Cannot find type 'ScienceContent'"**
+  - Ensure `Models/ScienceContent.swift` is in both targets (app + widget).
 
-The widget extension's `Info.plist` should already be configured, but verify:
-- **NSExtension** → **NSExtensionPointIdentifier**: `com.apple.widgetkit-extension`
+- **Widget shows old placeholder text**
+  - Remove the widget from the Home Screen, clean build, run widget scheme again, and re‑add the widget.
 
-## Step 6: Build and Run
+- **Xcode log: `Request widget family (systemMedium) is not supported`**
+  - Ensure `supportedFamilies` in `ScienceWidgetBundle` includes `.systemMedium` (already configured).
 
-1. Select the **ScienceWidgetExtension** scheme
-2. Choose a simulator (e.g., iPhone 15 Pro)
-3. Click **Run** (⌘R)
-4. The widget should appear in the simulator
-5. To add it to home screen:
-   - Long press on home screen
-   - Tap the **+** button
-   - Search for "Daily Science"
-   - Add the widget
+- **Provisioning / signing errors on device**
+  - For simulators: just set a Team; no device provisioning needed.
+  - For physical devices: add the device to your Apple ID / Developer account.
 
-## Step 7: Configure API (Next Steps)
+## When to use which doc
 
-### For NASA APOD API:
+- **QUICK_SETUP.md** – minimal steps to open, sign, and run the app + widget on a new machine.
+- **SETUP_CHECKLIST.md** – quick checklist to confirm everything is configured.
+- **SETUP_GUIDE.md** (this file) – reference for project structure, data flow, and common issues.
 
-1. Get a free API key from https://api.nasa.gov/
-2. Open `APIClient.swift`
-3. Update `fetchDailyScience()` method to use NASA API:
-   ```swift
-   return await fetchNASAAPOD(apiKey: "YOUR_API_KEY")
-   ```
-
-### For Custom API:
-
-1. Update `fetchDailyScience()` in `APIClient.swift`
-2. Implement your API endpoint
-3. Map the response to `ScienceContent` model
-
-### For AI Integration:
-
-1. Add your AI service SDK
-2. Implement `generateAIContent()` in `APIClient.swift`
-3. Update `fetchDailyScience()` to call AI service
-
-## Troubleshooting
-
-### Build Errors
-
-- **"Cannot find type 'ScienceContent'"**: Make sure all files are added to both targets
-- **"App Groups not configured"**: Complete Step 4 above
-- **Widget not appearing**: Make sure you're running the widget extension scheme, not the main app
-
-### Widget Not Updating
-
-- Widgets update on a schedule managed by iOS
-- Force refresh: Remove and re-add the widget
-- Check timeline policy in `ScienceTimelineProvider.swift`
-
-### Cache Issues
-
-- Clear app data: Delete app from simulator and reinstall
-- Check App Groups identifier matches in both targets
-
-## Testing
-
-1. **Simulator Testing**: Run widget extension scheme
-2. **Device Testing**: 
-   - Connect iOS device
-   - Select device in Xcode
-   - Run widget extension
-   - Widget will appear on device home screen
-
-## Next Steps
-
-- [ ] Choose and integrate data source (API or AI)
-- [ ] Test widget refresh behavior
-- [ ] Customize widget design
-- [ ] Add medium/large widget sizes (optional)
-- [ ] Add main app features (optional)
-
-## File Structure Reference
-
-```
-ScienceWidget/
-├── ScienceWidget/                    # Main app
-│   ├── ScienceWidgetApp.swift
-│   └── ContentView.swift
-├── ScienceWidgetExtension/           # Widget extension
-│   ├── ScienceWidgetBundle.swift
-│   ├── Models/
-│   │   └── ScienceContent.swift
-│   ├── Providers/
-│   │   ├── ScienceTimelineProvider.swift
-│   │   └── ScienceDataManager.swift
-│   ├── Views/
-│   │   ├── SmallWidgetView.swift
-│   │   └── WidgetPlaceholderView.swift
-│   └── Utilities/
-│       ├── APIClient.swift
-│       └── CacheManager.swift
-```
-
----
-
-**Note**: The code is ready to use, but you'll need to configure your chosen data source in `APIClient.swift` before the widget will show real content.

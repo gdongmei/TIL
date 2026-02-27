@@ -4,8 +4,10 @@ import Foundation
 class CacheManager {
     static let shared = CacheManager()
     
-    private let cacheKey = "science_content_cache"
-    private let dateKey = "science_content_date"
+    // Bump the cache keys when the cached data format or semantics change
+    // so old placeholder/sample data is ignored.
+    private let cacheKey = "science_content_cache_v2"
+    private let dateKey = "science_content_date_v2"
     private let userDefaults = UserDefaults(suiteName: "group.com.til.sciencewidget")
     
     private init() {}

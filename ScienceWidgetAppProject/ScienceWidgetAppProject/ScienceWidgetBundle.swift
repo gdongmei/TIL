@@ -15,10 +15,25 @@ struct ScienceWidget: Widget {
     
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: ScienceTimelineProvider()) { entry in
-            SmallWidgetView(content: entry.content)
+            ScienceWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Daily Science")
         .description("Get a new science fact every day.")
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies([.systemSmall, .systemMedium])
+    }
+}
+
+/// Decides which layout to use based on widget family
+struct ScienceWidgetEntryView: View {
+    let entry: ScienceEntry
+    @Environment(\.widgetFamily) private var family
+    
+    var body: some View {
+        switch family {
+        case .systemMedium:
+            MediumWidgetView(content: entry.content)
+        default:
+            SmallWidgetView(content: entry.content)
+        }
     }
 }

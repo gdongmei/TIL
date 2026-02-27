@@ -11,12 +11,7 @@ class ScienceDataManager {
     
     /// Gets today's science content, using cache if available
     func getTodaysContent() async -> ScienceContent {
-        // Check cache first
-        if cacheManager.isCacheValid(), let cached = cacheManager.getCachedContent() {
-            return cached
-        }
-        
-        // Fetch new content
+        // Fetch new content first (preferred)
         if let content = await apiClient.fetchDailyScience() {
             return content
         }

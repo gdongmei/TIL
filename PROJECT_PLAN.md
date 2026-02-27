@@ -18,8 +18,8 @@ Develop an iOS widget that displays one piece of science content every day on th
 
 1. **Widget Extension**
    - The actual widget UI that appears on the home screen
-   - SwiftUI-based view components
-   - Supports multiple widget sizes (starting with small)
+   - SwiftUI-based view components (`SmallWidgetView`, `MediumWidgetView`)
+   - Currently supports **small** and **medium** widget sizes
 
 2. **Timeline Provider**
    - Manages widget update schedule
@@ -27,25 +27,26 @@ Develop an iOS widget that displays one piece of science content every day on th
    - Handles entry generation and caching
 
 3. **Data Manager**
-   - Fetches science content from APIs or generates via AI
-   - Manages data caching and storage
-   - Handles offline fallback scenarios
+   - Fetches science content from the NASA APOD API
+   - Manages shared caching and storage for app + widget
+   - Handles offline / failure fallback scenarios
 
-4. **Main App** (Optional)
-   - Configuration and settings
-   - Manual refresh controls
-   - Widget preview/testing
+4. **Main App**
+   - Shows the **same daily NASA content** as the widget
+   - Provides a **Refresh** action to force a new fetch and update cache
+   - Useful for reading the full APOD explanation beyond widget truncation
 
 ## Data Source Strategy
 
-### Option A: Free APIs (Recommended for MVP)
+### Option A: Free APIs (**Chosen for MVP**)
 
-**Potential API Sources:**
+**Current API Source (Implemented):**
 - **NASA APOD (Astronomy Picture of the Day)**
   - Endpoint: `https://api.nasa.gov/planetary/apod`
-  - Free API key required
-  - Daily astronomy content with images
+  - Uses a personal API key
+  - Provides daily astronomy content with title, explanation, and optional image URL
 
+**Other possible sources (Future):**
 - **ScienceDaily RSS Feed**
   - RSS parsing required
   - Latest science news and discoveries
@@ -83,7 +84,7 @@ Develop an iOS widget that displays one piece of science content every day on th
 
 ## Widget Types & Design
 
-### Phase 1: Small Widget (Initial Focus)
+### Phase 1: Small Widget (Implemented)
 
 **Specifications:**
 - Size: 2x2 grid cells (smallest iOS widget size)
@@ -106,11 +107,11 @@ Develop an iOS widget that displays one piece of science content every day on th
 └─────────────────┘
 ```
 
-### Phase 2: Medium Widget (Future)
+### Phase 2: Medium Widget (Implemented)
 
 - Size: 4x2 grid cells
-- Content: Fact + image/illustration
-- More detailed information
+- Content: Same daily NASA fact with more visible text
+- Layout optimized for reading a longer portion of the explanation
 
 ### Phase 3: Large Widget (Future)
 
@@ -120,7 +121,7 @@ Develop an iOS widget that displays one piece of science content every day on th
 
 ## Implementation Plan
 
-### Phase 1: Foundation (Week 1)
+### Phase 1: Foundation
 
 1. **Project Setup**
    - Create Xcode project with Widget Extension
@@ -137,7 +138,7 @@ Develop an iOS widget that displays one piece of science content every day on th
    - Implement basic entry generation
    - Test timeline refresh behavior
 
-### Phase 2: Data Integration (Week 2)
+### Phase 2: Data Integration
 
 1. **Data Manager Implementation**
    - Create data fetching service
@@ -154,7 +155,7 @@ Develop an iOS widget that displays one piece of science content every day on th
    - Update widget with real content
    - Handle loading and error states
 
-### Phase 3: Polish & Testing (Week 3)
+### Phase 3: Polish & Testing
 
 1. **UI Refinement**
    - Dark mode optimization
@@ -194,50 +195,50 @@ Develop an iOS widget that displays one piece of science content every day on th
 
 ## Development Workflow
 
-### File Structure (Proposed)
+### File Structure (Current)
 ```
-ScienceWidget/
-├── ScienceWidget/
-│   ├── ScienceWidgetApp.swift          # Main app entry
-│   ├── ScienceWidgetBundle.swift       # Widget bundle
+ScienceWidgetAppProject/
+├── ScienceWidgetAppProject/                # Main app + shared code
+│   ├── ScienceWidgetApp.swift              # Main app entry
+│   ├── ContentView.swift                   # Full-screen daily science view
+│   ├── ScienceWidgetBundle.swift           # Widget bundle + family switching
 │   ├── Views/
-│   │   ├── SmallWidgetView.swift       # Small widget UI
-│   │   └── WidgetPlaceholderView.swift # Placeholder
+│   │   ├── SmallWidgetView.swift           # Small widget UI
+│   │   ├── MediumWidgetView.swift          # Medium widget UI
+│   │   └── WidgetPlaceholderView.swift     # Placeholder (WidgetKit)
 │   ├── Providers/
-│   │   ├── ScienceTimelineProvider.swift # Timeline logic
-│   │   └── ScienceDataManager.swift    # Data fetching
+│   │   ├── ScienceTimelineProvider.swift   # Timeline logic
+│   │   └── ScienceDataManager.swift        # Data fetching + caching
 │   ├── Models/
-│   │   └── ScienceContent.swift        # Data models
+│   │   └── ScienceContent.swift            # Data model
 │   └── Utilities/
-│       ├── APIClient.swift             # API integration
-│       └── CacheManager.swift          # Local storage
-└── ScienceWidgetTests/
-    └── ScienceWidgetTests.swift
+│       ├── APIClient.swift                 # NASA APOD integration
+│       └── CacheManager.swift              # Shared local storage
+├── ScienceWidgetExtension/                 # Widget extension bundle
+│   ├── Info.plist
+│   └── Assets.xcassets
+└── ScienceWidgetAppProject.xcodeproj
 ```
 
 ## Next Steps
 
-1. **Decide on Data Source**
-   - Evaluate API options
-   - Test API availability and content quality
-   - Consider AI integration feasibility
+1. **Polish & UX**
+   - Tune typography and truncation for small vs medium widgets
+   - Consider adding image support from NASA APOD URLs
 
-2. **Set Up Development Environment**
-   - Ensure Xcode is installed
-   - Set up iOS development certificates (if needed)
-   - Create new Xcode project
+2. **Reliability**
+   - Improve error messaging when NASA is unreachable
+   - Add lightweight logging/metrics if needed
 
-3. **Start Implementation**
-   - Begin with Phase 1 tasks
-   - Iterate based on testing and feedback
+3. **Future Enhancements**
+   - Explore additional APIs or AI-generated fallback content
+   - Add larger widget size or interactive elements (iOS 16+)
 
 ## Questions to Resolve
 
-- [ ] Which API will be used? (NASA APOD, custom, or other)
-- [ ] Will AI generation be integrated? If so, which service?
-- [ ] What time should the widget update daily?
-- [ ] Should there be a main app interface or widget-only?
-- [ ] Any specific science topics to focus on? (astronomy, biology, physics, etc.)
+- [ ] Will AI generation be integrated as a fallback? If so, which service?
+- [ ] Should the widget support configurable topics (astronomy-only vs broader science)?
+- [ ] Do we need user-configurable update time vs fixed daily schedule?
 
 ## Resources
 
@@ -248,5 +249,5 @@ ScienceWidget/
 
 ---
 
-**Last Updated**: Initial planning phase
-**Status**: Planning → Ready for Implementation
+**Last Updated**: After initial implementation (small + medium widgets, NASA integration, shared app view)
+**Status**: Core MVP implemented → Polish & enhancement phase

@@ -6,6 +6,8 @@ class APIClient {
     
     private let session: URLSession
     private let cacheManager = CacheManager.shared
+    /// Replace this with your real NASA API key from https://api.nasa.gov/
+    private let nasaAPIKey = "95yeB369e0eRo70gTvL4He23e2f9VvOwuG4stzN4"
     
     private init() {
         let configuration = URLSessionConfiguration.default
@@ -22,26 +24,23 @@ class APIClient {
             return cached
         }
         
-        // TODO: Replace with actual API endpoint
-        // Options:
-        // 1. NASA APOD: https://api.nasa.gov/planetary/apod?api_key=YOUR_KEY
-        // 2. Custom API endpoint
-        // 3. AI-generated content endpoint
+        // If NASA API key is configured, try to fetch real APOD content
+        if nasaAPIKey != "YOUR_NASA_API_KEY_HERE",
+           let nasaContent = await fetchNASAAPOD(apiKey: nasaAPIKey) {
+            return nasaContent
+        }
         
-        // For now, return a sample content
-        // This will be replaced with actual API call
+        // Fallback: return a sample content if API key is missing or request fails
         let sampleContent = ScienceContent(
-            id: UUID().uuidString,
-            title: "Sample Science Fact",
-            content: "This is a placeholder. Replace with actual API integration.",
-            date: Date(),
-            source: "Sample",
-            imageURL: nil
-        )
+               id: UUID().uuidString,
+               title: "NASA FALLBACK",
+               content: "NASA request failed or key invalid.",
+               date: Date(),
+               source: "Sample",
+               imageURL: nil
+           )
         
-        // Cache the content
         cacheManager.saveContent(sampleContent)
-        
         return sampleContent
     }
     

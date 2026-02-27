@@ -12,7 +12,8 @@
 
 1. **Create Xcode project IN this directory** (`/Users/gaod1/projects/TIL/`)
    - When Xcode asks for location, choose `/Users/gaod1/projects/TIL/`
-   - This creates `ScienceWidget.xcodeproj` in the same directory
+   - Xcode will create a folder like `ScienceWidgetAppProject/` and the project file will be inside it:
+     - `ScienceWidgetAppProject/ScienceWidgetAppProject.xcodeproj`
 
 2. **Copy Swift files from Cursor into Xcode** (as per SETUP_GUIDE.md)
 

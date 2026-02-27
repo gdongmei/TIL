@@ -6,7 +6,7 @@ An iOS widget that displays one piece of science content every day on your phone
 
 ## Project Status
 
-🚧 **Planning Phase** - Ready for implementation
+✅ **MVP Implemented** - Small & medium widgets with NASA APOD integration
 
 ## Documentation
 
@@ -19,13 +19,24 @@ An iOS widget that displays one piece of science content every day on your phone
 ## Quick Overview
 
 - **Platform**: iOS (WidgetKit)
-- **Widget Type**: Small widget (Phase 1), expandable to medium/large
+- **Widget Type**: Medium widget (Phase 1), expandable to large
 - **Data Source**: Free APIs or AI-generated content (TBD)
 - **Development**: Cursor + Xcode
 
+## Screenshots
+
+- **Medium widget**
+
+  ![Medium widget](Screenshots/widget-medium.png)
+
+- **App view**
+
+  ![App view](Screenshots/app-full.png)
+
 ## Next Steps
 
-1. Review [PROJECT_PLAN.md](./PROJECT_PLAN.md) for detailed architecture
-2. Decide on data source (API vs AI)
-3. Set up Xcode project structure
-4. Begin Phase 1 implementation
+1. Polish widget UI (fonts, truncation, spacing) for small and medium sizes.
+2. Improve error handling and offline behavior when NASA is unreachable.
+3. Optionally add secondary data sources or AI-generated fallback content.
+4. Prepare for distribution (icons, app metadata, and App Store readiness).
+
