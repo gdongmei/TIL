@@ -25,13 +25,9 @@ An iOS widget that displays one piece of science content every day on your phone
 
 ## Screenshots
 
-- **Medium widget**
-
-  ![Medium widget](Screenshots/widget-medium.png)
-
-- **App view**
-
-  ![App view](Screenshots/app-full.png)
+| Medium widget | App view |
+| --- | --- |
+| ![Medium widget](Screenshots/widget-medium.png) | ![App view](Screenshots/app-full.png) |
 
 ## Next Steps
 
