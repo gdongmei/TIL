@@ -1,6 +1,6 @@
 # TIL - Today I Learned: Daily Science Widget
 
-My first application created by Cursor.
+My first practice of vide coding using Cursor.
 
 An iOS widget that displays one piece of science content every day on your phone's home screen.
 
